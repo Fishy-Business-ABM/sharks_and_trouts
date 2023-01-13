@@ -3,7 +3,7 @@
 ## Task Distribution
 - Literature Review - Jonas & Paul
 
-- Prototyping (with tests) - Hape & Pelle & **( Mehdi for help)**
+- Prototyping (with tests) - Hape & Pelle & *(Mehdi for help)*
 
 - Low Level Implementation #GottaGoFast  - Mehdi
 
