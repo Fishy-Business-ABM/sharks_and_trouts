@@ -8,11 +8,15 @@ initial_energy = 10
 class model(mesa.Model):
     '''Create a continuous space for the agents to move in'''
 
-    def __init__(self, width=10, height=10, shark_move_cost=2,
-                 fish_move_cost=0.2, shark_vision=2, fish_vision=1,
-                 shark_eat_radius=0.5, shark_food_energy = 1,
-                 fish_initial_energy=2, shark_initial_energy=10,
+    def __init__(self,
+                 width=10, height=10,
+                 shark_move_cost=2, fish_move_cost=0.2,
+                 shark_vision=5, fish_vision=3,
+                 shark_eat_radius=0.5,
+                 shark_food_energy = 1,
+                 shark_initial_energy=10, fish_initial_energy=2,
                  shark_max_speed=1, fish_max_speed=2):
+
         self.height = width
         self.width = height
         self.shark_move_cost = shark_move_cost
