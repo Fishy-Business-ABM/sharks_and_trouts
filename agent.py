@@ -5,6 +5,7 @@ import numpy as np
 import math
 
 max_move_dist = 1
+#hallo
 
 # Define an animal
 class Animal(Agent):
