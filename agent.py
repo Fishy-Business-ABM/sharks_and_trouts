@@ -1,4 +1,5 @@
-from mesa import Agent
+from mesa import Agent, Model
+from p5 import Vector, setup, draw, size, background, run, stroke, circle
 import random
 from copy import copy
 import numpy as np
@@ -42,64 +43,67 @@ class Animal(Agent):
             self.model.remove_agent(self)
 
 # Define a shark
-class Shark(Animal):
-    def __init__(self, id, model, pos):
-        super().__init__(id, model, pos, model.shark_initial_energy ,model.shark_move_cost)
-    
-    def step(self):
-        assert self != None
-        
-        # If in sight, move towards closest fish
-        fishes = self.model.space.get_neighbors(self.pos, self.model.shark_vision, False)
-        for fish in fishes:
-            if type(fish) != Fish:
-                fishes.remove(fish)
-        if len(fishes) > 0:
-
-            # Find closest fish and its distance
-            min_dist = self.model.shark_vision
-            closest = None
-            for fish in fishes:
-                dist = self.model.space.get_distance(fish.pos, self.pos)
-                if dist < min_dist:
-                    min_dist = dist
-                    closest = fish
-            dist = min_dist
-
-            # Move at most max_move_dist towards closest fish
-            x_dist = closest.pos[0] - self.pos[0]
-            y_dist = closest.pos[1] - self.pos[1]
-            if dist > max_move_dist:
-                x_dist = x_dist * (max_move_dist / dist)
-                y_dist = y_dist * (max_move_dist / dist)
-            new_pos = (self.pos[0] + x_dist, self.pos[1] + y_dist)
-            self.model.space.move_agent(self, new_pos)
-
-        # Otherwise, move randomly
-        else:
-            self.random_move()
-
-        # Maybe die
-        self.maybe_die()
-
-        # Eat fish within defined radius
-        fishes = self.model.space.get_neighbors(self.pos, self.model.shark_eat_radius, False)
-        for fish in fishes:
-            if type(fish) == Fish:
-                self.model.remove_agent(fish)
-                self.energy += self.model.shark_food_energy
+#class Shark(Animal):
+#    def __init__(self, id, model, pos):
+#        super().__init__(id, model, pos, model.shark_initial_energy ,model.shark_move_cost)
+#    
+#    def step(self):
+#        assert self != None
+#        
+#        # If in sight, move towards closest fish
+#        fishes = self.model.space.get_neighbors(self.pos, self.model.shark_vision, False)
+#        for fish in fishes:
+#            if type(fish) != Fish:
+#                fishes.remove(fish)
+#        if len(fishes) > 0:
+#
+#            # Find closest fish and its distance
+#            min_dist = self.model.shark_vision
+#            closest = None
+#            for fish in fishes:
+#                dist = self.model.space.get_distance(fish.pos, self.pos)
+#                if dist < min_dist:
+#                    min_dist = dist
+#                    closest = fish
+#            dist = min_dist
+#
+#            # Move at most max_move_dist towards closest fish
+#            x_dist = closest.pos[0] - self.pos[0]
+#            y_dist = closest.pos[1] - self.pos[1]
+#            if dist > max_move_dist:
+#                x_dist = x_dist * (max_move_dist / dist)
+#                y_dist = y_dist * (max_move_dist / dist)
+#            new_pos = (self.pos[0] + x_dist, self.pos[1] + y_dist)
+#            self.model.space.move_agent(self, new_pos)
+#
+#        # Otherwise, move randomly
+#        else:
+#            self.random_move()
+#
+#        # Maybe die
+#        self.maybe_die()
+#
+#        # Eat fish within defined radius
+#        fishes = self.model.space.get_neighbors(self.pos, self.model.shark_eat_radius, False)
+#        for fish in fishes:
+#            if type(fish) == Fish:
+#                self.model.remove_agent(fish)
+#                self.energy += self.model.shark_food_energy
 
 # Define a fish
 class Fish(Animal):
     def __init__(self, id, model, pos,vel,acc,perception):
         super().__init__(id, model, pos,vel,acc, model.fish_initial_energy, model.fish_move_cost)
+        x,y = pos
+        v_x,v_y = vel
         self.perception = perception
-        self.position = np.asarray(pos)
-        self.velocity = np.asarray(vel)
-        self.acceleration = np.asarray(acc)
+        self.position = Vector(x,y)
+        self.velocity = Vector(v_x,v_y) 
+        self.acceleration = Vector(0,0)
+        self.model = model
 
     
-    def align(self, model):
+    def align(self):
         steering = np.zeros((2,1))
         fishes = self.model.space.get_neighbors(self.pos,self.perception,False)
 
@@ -113,9 +117,9 @@ class Fish(Animal):
         
         return steering
 
-    def separation(self, model):
+    def separation(self):
         steering = np.zeros((2,1))
-        fishes = self.model.space.get_neighbors(self.pos,self.perception,False)
+        fishes = self.model.space.get_neighbors((self.position.x,self.position.y),self.perception,False)
 
         for fish in fishes:
             d = np.linalg.norm(self.position - fish.position)
@@ -129,9 +133,9 @@ class Fish(Animal):
         
         return steering
     
-    def cohesion(self, model):
+    def cohesion(self):
         steering = np.zeros((2,1))
-        fishes = self.model.space.get_neighbors(self.pos,self.perception,False)
+        fishes = self.model.space.get_neighbors((self.position.x,self.position.y),self.perception,False)
 
         for fish in fishes:
             d = np.linalg.norm(self.position - fish.position)
@@ -144,9 +148,9 @@ class Fish(Animal):
         return steering
 
     def step(self):
-        alignment = self.align(self.model)
-        separation = self.separation(self.model)
-        cohesion = self.cohesion(self.model)
+        alignment = self.align()
+        separation = self.separation()
+        cohesion = self.cohesion()
 
 
         self.acceleration += 0.2 * alignment
@@ -156,7 +160,9 @@ class Fish(Animal):
         self.position += self.velocity
         self.velocity += self.acceleration
             
-
+    def show(self):
+        stroke(255)
+        circle((self.position.x,self.position.y), 10)
 
 
 
