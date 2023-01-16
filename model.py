@@ -34,8 +34,6 @@ class model(mesa.Model):
         self.n_agents = 0
         self.agents = []
 
-
-
     def new_agent(self, agent_type, pos):
         '''This allows us to make agents of a given type'''
 
@@ -62,12 +60,28 @@ class model(mesa.Model):
         #Remove agent from space
         self.space.remove_agent(agent)
         self.agents.remove(agent)
-
+        
         #Remove agent from scheduler
         getattr(self, f'schedule_{type(agent).__name__}').remove(agent)
-
+        
+        
     def step(self):
         '''The time step function'''
 
         self.schedule_Fish.step()
         self.schedule_Shark.step()
+
+
+
+
+class TestAgent(Agent):
+    def __init__(self, unique_id: int, model: Model, pos) -> None:
+        super().__init__(unique_id, model)
+        
+        self.pos = pos
+
+testmodel = model(10,10)
+
+posistion = (5,5)
+testmodel.new_agent(TestAgent,posistion)
+testagent = testmodel.agents[0]
