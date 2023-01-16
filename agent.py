@@ -14,7 +14,7 @@ class Animal(Agent):
         self.move_cost = move_cost
         self.max_speed = max_speed
     
-    # Move to a random spot within a radius 1 square
+    # Move in a random direction at random speed
     def random_move(self):
         assert self in self.model.agents
 
